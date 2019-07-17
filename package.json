@@ -1,0 +1,43 @@
+{
+  "name": "baseballimage",
+  "version": "1.0.0",
+  "description": "Web service to retreive MLB 'standings' images for teams",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "npm run tsc",
+    "start": "ts-node src/app.ts",
+    "dev": "ts-node-dev --respawn --transpileOnly ./src/app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "prepare": "npm run build",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kfaubel/baseballImage.git"
+  },
+  "author": "Ken Faubel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kfaubel/baseballImage/issues"
+  },
+  "homepage": "https://github.com/kfaubel/baseballImage#readme",
+  "dependencies": {
+    "@types/express": "^4.17.0",
+    "axios": "^0.19.0",
+    "canvas": "^2.5.0",
+    "express": "^4.17.1",
+    "ts-node-dev": "^1.0.0-pre.40",
+    "typescript": "^3.5.2",
+    "xml-js": "^1.6.11"
+  },
+  "devDependencies": {
+    "prettier": "^1.18.2",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0"
+  },
+  "files": [
+    "build/**/*"
+  ]
+}

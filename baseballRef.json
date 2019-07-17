@@ -1,0 +1,35 @@
+{
+    "subject": "master_scoreboard",
+    "copyright": "NOTICE: This file is no longer actively supported. Please use the MLB Stats API (http://statsapi.mlb.com/docs/) as an alternative.  Copyright 2019 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+    "data": {
+        "games": {
+            "game": [
+                {
+                    "home_probable_pitcher": { },
+                    "away_probable_pitcher": { },                        
+                    "game_media": { },
+                        
+                    "away_file_code": "la",     // !
+                    "away_loss": "33",          // ?
+                    "away_name_abbrev": "LAD",  // !
+                    "away_team_runs": "",       // !
+                    "away_time": "4:05",        // !
+                    "away_win": "63",           // ?
+                    "game_type": "R",           // ?
+                    "home_loss": "46",          // ?
+                    "home_name_abbrev": "PHI",  // !
+                    "home_team_runs": "",       // !
+                    "home_win": "48",           // ?
+                    "inning": "",               // !
+                    "series": "Regular Season", // ?
+                    "status": "Scheduled",      // !
+                    "top_inning": "N"           // !
+                },
+                { }
+            ],
+            "date": "20190716",
+            "last_modified": "",
+            "xmlns:xs": "http://www.w3.org/2001/XMLSchema"
+        }
+    }
+}
