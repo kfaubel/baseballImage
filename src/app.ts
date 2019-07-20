@@ -1,37 +1,46 @@
 // lib/app.ts
 import express = require('express');
-const BaseballData = require('./baseballdata');
-//const WeatherImage = require('./baseballimage');
+//const BaseballData = require('./baseballdata');
+const BaseballImage = require('./baseballimage');
+const fs = require('fs');
+const stream = require('stream');
+const util = require('util');
+
+const teamTable = require('./teams.json');
 
 // Create a new express application instance
 async function run() {
 
-    const baseballData = new BaseballData();
-    const today = new Date();
-
-    console.log("Today is: " + today);
-
-    const result1 = await baseballData.getGames(today, "BOS");
-    const result2 = await baseballData.getGames(today, "BOS");
+    const baseballImage = new BaseballImage();
+    
     
 
 
+    const teams = Object.keys(teamTable);
 
-
-
-   
+    for (const team of teams) {
+        console.log(`Starting process for team:  ${team}`)
     
+        const imageStream = await baseballImage.getImageStream(team);
+        console.log("got imagestream");
 
-    //const imageStream = weatherImage.getImageStream();
+        // console.log("__dirname: " + __dirname);
+        
+        console.log("`Writing: " + __dirname +'/../teams/' + team + '.png')
+        const out = fs.createWriteStream(__dirname +'/../teams/' + team + '.png');
 
-    // console.log("__dirname: " + __dirname);
-    // const fs = require('fs');
-    // const out = fs.createWriteStream(__dirname +'/../test.png');
 
-    // imageStream.pipe(out);
-    // // tslint:disable-next-line:no-console
-    // out.on('finish', () =>  console.log('The PNG file was created.\n'));
+        const finished = util.promisify(stream.finished);
+
+        imageStream.pipe(out);
+        // tslint:disable-next-line:no-console
+        out.on('finish', () =>  console.log('The PNG file was created.\n'));
+
+        await finished(out);
+
+    }
 }
+
 
 run();
 

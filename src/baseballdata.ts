@@ -1,5 +1,6 @@
 const convert = require('xml-js');
 const axios = require('axios');
+const fs = require('fs');
 
 // Onset" https://forecast.baseball.gov/MapClick.php?lat=41.7476&lon=-70.6676&FcstType=digitalDWML
 // NOLA   https://forecast.baseball.gov/MapClick.php?lat=29.9537&lon=-90.0777&FcstType=digitalDWML
@@ -27,7 +28,8 @@ const axios = require('axios');
 module.exports = class BaseballData {
     
     private agent: string = "ken@faubel.org";
-    private cache: any[] = [];
+    private cache: any = {};
+    ////private cache = new Map();  // myMap.set(keyString, "value associated with 'a string'");      myMap.size; // 3       myMap.get(keyString);  
 
     constructor(config) {
         // this.lat = config.lat;
@@ -36,37 +38,49 @@ module.exports = class BaseballData {
         // http://gd2.mlb.com/components/game/mlb/year_2019/month_04/day_23/miniscoreboard.json
         //this.url = `String urlStr = "https://gd2.mlb.com/components/game/mlb/year_${this.yearXXXX}/month_${this.monthXX}/day_${this.dayXX}/miniscoreboard.json";`
 
+        try {
+            const cacheString = fs.readFileSync('./cache.json', 'utf8');
+            this.cache = JSON.parse(cacheString);
+        } catch (err) {
+            console.log("no cache to load");
+        }
     }
 
-    public async getGames(gameDate, theTeam: string) {
-        let baseballXml: string = "";
-        let baseballGameArray: any[] = [];
 
-        console.log("day: " + gameDate.getDay());
+    public async dumpCache() {
+        console.log("Saving cache.");
+        fs.writeFile('./cache.json', JSON.stringify(this.cache, null, 4), function(err) {
+            if(err) console.log(err)
+        })
+    }
+    
+    public async getDate(gameDate, theTeam: string) {
         
         let gameDayObj: any = {
             year: gameDate.getFullYear(),                            // 2019
             month: ('00' + (gameDate.getMonth() +1)).slice(-2),      // 10       getMonth() returns 0-11
-            day: ('00' + gameDate.getDay()).slice(-2),               // 04
+            day: ('00' + gameDate.getDate()).slice(-2),               // 04
             games: [] as any[] // Not very satisfing but does prevent an inferred "never" error below
         }
 
+        let cacheChanges: boolean = false;
         
         const key = gameDayObj.year + "_" + gameDayObj.month + "_" + gameDayObj.day;
 
         let baseballJson: any = null;
-        console.log("cache: " + JSON.stringify(this.cache, null, 4));
+        //console.log("cache: " + JSON.stringify(this.cache, null, 4));
     
-        if (this.cache[key] != null) {
-            console.log("Key: " + key + " found in cache");
+        ////if (this.cache.get(key) != undefined) {
+        if (this.cache[key] != undefined) {
             baseballJson = this.cache[key];
+            console.log("[" + theTeam + "] Found: " + key); //: " + JSON.stringify(baseballJson, null, 4));
+           
         } else {
-            console.log("Key: " + key + " NOT found in cache.  Looking it up.");
-
             const url = `https://gd2.mlb.com/components/game/mlb/year_${gameDayObj.year}/month_${gameDayObj.month}/day_${gameDayObj.day}/miniscoreboard.json`;
 
+            console.log("[" + theTeam + "] Did NOT Find key: " + key);
             // tslint:disable-next-line:no-console
-            console.log("URL: " + url);
+            //console.log("URL: " + url);
 
             const headers = {
                 'Access-Control-Allow-Origin': '*',
@@ -78,8 +92,9 @@ module.exports = class BaseballData {
                     // handle success
                     baseballJson = response.data;
                     //console.log("MLB response data: " + JSON.stringify(baseballJson, null, 4));
-                    this.cache[key] = baseballJson;
-                    console.log("cache updated: " + JSON.stringify(this.cache, null, 4));
+                    this.cache[key] =  baseballJson;
+                    console.log("[" + theTeam + "] cache updated for: " + key);
+                    cacheChanges = true;
                 })
                 .catch((error: string) => {
                     // handle error
@@ -87,23 +102,45 @@ module.exports = class BaseballData {
                     console.log("Error: " + error);
                 })            
         }
+        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        if (baseballJson.length === 0) {
-            return null;
-        }
+        if (baseballJson !== null) {
 
-        //console.log("MLB Result: " + JSON.stringify(baseballJson, null, 4));
+            //console.log("MLB Result: " + JSON.stringify(baseballJson, null, 4));
 
-        let game: any = null;
-        for (game of baseballJson.data.games.game) {
-            if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
-                gameDayObj.games.push(game);
+            
+
+            let game: any = null;
+            for (game of baseballJson.data.games.game) {
+                if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
+                    //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
+                    game.day = weekdays[gameDate.getDay()];
+                    game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
+                    gameDayObj.games.push(game);
+                }
             }
         }
 
-        // tslint:disable-next-line:no-console
-        console.log("Game Day: " + JSON.stringify(gameDayObj, null, 4));
+        // For whatever reason
+        if (gameDayObj.games.length == 0) {
+            const dayStr = weekdays[gameDate.getDay()];
+            const dateStr = months[gameDate.getMonth()] + " " + gameDate.getDate();
+            const game = {status: "OFF", day: dayStr, date: dateStr};
+            gameDayObj.games.push(game);
+        }
 
+        // tslint:disable-next-line:no-console
+        //console.log("Game Day: " + JSON.stringify(gameDayObj, null, 4));
+
+        if (cacheChanges) {
+            console.log("[" + theTeam + "] Saving the cache.");
+            try {
+                fs.writeFileSync('./cache.json', JSON.stringify(this.cache, null, 4));
+            } catch (err) {
+                console.log("Failed to write cache.json");
+            }
+        }
         
         return gameDayObj;
     }

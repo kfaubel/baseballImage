@@ -19,6 +19,7 @@
                     "home_loss": "46",          // ?
                     "home_name_abbrev": "PHI",  // !
                     "home_team_runs": "",       // !
+                    "home_time": "1:05",        // !
                     "home_win": "48",           // ?
                     "inning": "",               // !
                     "series": "Regular Season", // ?

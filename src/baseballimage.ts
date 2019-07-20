@@ -1,153 +1,289 @@
 const { createCanvas, loadImage } = require('canvas');
 const BaseballData = require('./baseballdata');
+// https://teamcolorcodes.com/los-angeles-angels-color-codes/
+const teamTable = require('./teams.json');
 
 //export function generateImage(wData: any) {
-module.exports = class WeatherImage {
+module.exports = class BaseballImage {
     private baseballData: any;
     private dayList: any[] = [];
 
     constructor() {
-        //this.weatherConfig = weatherConfig;
+       console.log("Constructing BaseballImage") 
     }
-    public async getImageStream() {
+
+    public async getImageStream(teamAbbrev: string) {
 
         
-        const todayMs = new Date().getTime();
-        let baseballData = new BaseballData();
+        const today = new Date();
+        this.baseballData = new BaseballData();
+        this.dayList = [];
+
+        //let day = await baseballData.getDate(new Date(), teamAbbrev); // Test the cache
 
         // Get date 2 days ago through 4 days from now.  7 Days total
-        for (let dayIndex: number = -2; dayIndex <= 4; dayIndex++) {
-            const requestDate = new Date(todayMs + (dayIndex * 24 * 60 * 60 * 1000))
-            let day = baseballData.getDate(requestDate);
+        for (let dayIndex: number = -2; dayIndex <= 4; dayIndex++) {      
+            let requestDate = new Date();
+            requestDate.setDate(requestDate.getDate() + dayIndex);
+            console.log("Requesting game for date: " + requestDate);
+            let day = await this.baseballData.getDate(requestDate, teamAbbrev);
             this.dayList.push(day);
+            console.log("----------- " + this.dayList.length);
         }
 
-        // int fgColor = Color.WHITE;
-        // int bgColor = 0x303030;  // sorta gray
+        // Now sort through the 7 days of games to see which ones to show.
+        // Double headers cause us to show different games than 1/day
 
-        // if (team.equals("bos")) {
-        //     fgColor = Color.WHITE;
-        //     bgColor = 0xff4f7359;  // Fenway Green
-        // } else if (team.equals("nyy")) {
-        //     fgColor = Color.WHITE;
-        //     bgColor = 0xff1C2841;  // Yankee's Navy
-        // }
+        // dayList is the array of 7 days we got above
+        // gameList is the array of games we will display in the 7 slots
+        let gameList: any[] = [];
+        const TODAY: number = 2; // Index in the array of today's game
+        
+        // Slot 0 - if Yesterday was a double header, its game 1, else its the last game from the day before yesterday
+        if (this.dayList[TODAY - 1].games.length == 2) {
+            gameList[0] = this.dayList[TODAY - 1].games[0]; // First game from yesterday
+        } else {
+            if (this.dayList[TODAY - 2].games.length == 2) {
+                // there was a doubleheader 2 days ago, show the second game
+                gameList[0] = this.dayList[TODAY - 2].games[1];
+            } else {
+                // No double header either day so just show game 1, null if OFF
+                gameList[0] = this.dayList[TODAY - 2].games[0];
+            }
+        }
 
-        // Bitmap imageBitmap = Bitmap.createBitmap(1280, 800, Bitmap.Config.RGB_565);
-        // Canvas canvas = new Canvas(imageBitmap);
-        // Paint p = new Paint();
-        // Rect bounds = new Rect();
-        // canvas.drawColor(bgColor);
-        // p.setTypeface(Typeface.create("sans-serif-black", Typeface.NORMAL));
-        // p.setColor(fgColor);
+        // Slot 1 - This is yesterdays game 2 if there was one, otherwise game 1 if played, otherwise null
+        if (this.dayList[TODAY - 1].games.length == 2) {
+            gameList[1] = this.dayList[TODAY - 1].games[1];
+        } else {
+            // No double header either day so just show game 1, null if OFF
+            gameList[1] = this.dayList[TODAY - 1].games[0];
+        }
 
-        // // Draw the outline
-        // p.setStrokeWidth(10);
-        // canvas.drawLine(0, 0, 1280, 0, p);
-        // canvas.drawLine(0, 0, 0, 800, p);
-        // canvas.drawLine(1280, 0, 1280, 800, p);
-        // canvas.drawLine(0, 800, 1280, 800, p);
+        // Slots 2..6 - Fill them in with each game.  We may use more slots but we only will display 0-6
+        let nextGameSlot = 2; // Today's game 1
+        for (let daySlot = TODAY; daySlot <= TODAY+4; daySlot++) {
+            gameList[nextGameSlot++] = this.dayList[daySlot].games[0]; 
 
-        // // Draw the box for today.  Make it bigger if its a double header
+            if (this.dayList[daySlot].games.length == 2) {
+                gameList[nextGameSlot++] = this.dayList[daySlot].games[1]; 
+                //console.log("Adding game 2 to the game list");
+            }
+        }
 
-        // int boxHeight;
-        // if (dayList.get(TODAY).isGame2()) {
-        //     boxHeight = 170;
-        // } else {
-        //     boxHeight = 80;
-        // }
+        //console.log("gameList: " + JSON.stringify(gameList, null, 4));
 
-        // int boxTopY = 340;
-        // int boxMottomY = boxTopY + boxHeight;
+        console.log("Starting the draw for " + teamAbbrev);
 
-        // p.setStrokeWidth(5);
-        // canvas.drawLine(10,   boxTopY,    1270, boxTopY, p);    // top line
-        // canvas.drawLine(10,   boxMottomY, 1270, boxMottomY, p); // bottom line
-        // canvas.drawLine(10,   boxTopY,    10,   boxMottomY, p); // left side
-        // canvas.drawLine(1270, boxTopY,    1270, boxMottomY, p); // right side
+        //await this.baseballData.dumpCache();
 
-        // String divisionStr = team.toUpperCase() + " Schedule";
-        // p.setTextSize(110);
-        // p.getTextBounds(divisionStr, 0, divisionStr.length(), bounds);
-        // canvas.drawText(divisionStr, 640 - bounds.width()/2, 125, p);
+        const imageHeight: number = 1080; // 800;
+        const imageWidth: number  = 1920; // 1280;
 
-        // if (dayList.size() == 0) {
-        //     Klog.w(TAG, "getBitmap(): dayList was empty");
-        //     return null;
-        // }
+        const titleFont: string = 'bold 90px sans-serif';   // Title
+        const gamesFont: string = 'bold 90px sans-serif';    // row of game data
 
-        // // gameList varies depending on double headers
-        // ArrayList<MlbGame> gameList = new ArrayList<>();
+        const OutlineStrokeWidth: number  = 30;
+        const boarderStrokeWidth: number  = 30;
+        const boxStrokeWidth: number      = 10;
 
-        // // Slot 0 - if Yesterday was a double header, its game 1, else its the last game from the day before yesterday
-        // if (dayList.get(TODAY - 1).getGames2() != null) {
-        //     gameList.add(0, dayList.get(1).getGames1());
-        // } else {
-        //     if (dayList.get(TODAY - 2).isGame2()) {
-        //         // there was a doubleheader 2 days ago, show the second game
-        //         gameList.add(0, dayList.get(TODAY - 2).getGames2());
-        //     } else {
-        //         // No double header either day so just show game 1, null if OFF
-        //         gameList.add(0, dayList.get(TODAY - 2).getGames1());
-        //     }
-        // }
+        const backgroundColor: string     = teamTable[teamAbbrev].color1; //'rgb(71, 115, 89)'; // 0xff4f7359 - Fenway green
+        const DrawingColor: string        = teamTable[teamAbbrev].color2;'rgb(200, 200, 200)';
+        const textColor: string           = teamTable[teamAbbrev].color3;'white';
 
-        // // Slot 1 - This is yesterdays game 2 if there was one, otherwise game 1 if played, otherwise null
-        // if (dayList.get(TODAY - 1).isGame2()) {
-        //     gameList.add(1, dayList.get(TODAY - 1).getGames2());
-        // } else {
-        //     // No double header either day so just show game 1, null if OFF
-        //     gameList.add(1, dayList.get(TODAY - 1).getGames1());
-        // }
+        const TitleOffset: number         = 100;
 
-        // // Slots 2..6 - Fill them in with each game.  We may use more slots but we only will display 0-6
-        // int nextGameSlot = 2; // Today's game 1
-        // for (int daySlot = TODAY; daySlot <= TODAY+4; daySlot++) {
-        //     gameList.add(nextGameSlot++, dayList.get(daySlot).getGames1());
+        const boxHeight1: number          = 110;
+        const boxHeight2: number          = 200; // Double header
+        const boxHorMargin: number        = 30;
+        const boxTopY: number             = 450;
 
-        //     if (dayList.get(daySlot).isGame2()) {
-        //         gameList.add(nextGameSlot++, dayList.get(daySlot).getGames2());
-        //         Klog.i(TAG, "Adding game 2 to the game list");
-        //     }
-        // }
+        const firstGameYOffset: number    = 275;
+        const gameYOffset: number         = 130;
 
-        // Boolean atLeastOneGame = false;
-        // for (int gameIndex = 0; gameIndex <= 6; gameIndex++) {
-        //     int left;
-        //     int top;
-        //     int right;
-        //     int bottom;
+        const dayXOffset: number        = 40;
+        const dateXOffset: number       = 320;
+        const teamXOffset: number       = 700;
+        const homeAwayXOffset: number   = 950;
+        const opponentXOffset: number   = 1050;
+        const gameTextXOffset: number   = 1300;
 
-        //     MlbGame game = gameList.get(gameIndex);
-        //     if (!game.getStatus().equals("OFF")) {
-        //         atLeastOneGame = true;
-        //     }
+        const canvas = createCanvas(imageWidth, imageHeight);
+        const ctx = canvas.getContext('2d');
 
-        //     int yOffset = 220 + (gameIndex * 90);
-        //     p.setColor(Color.WHITE);
-        //     p.setTextSize(64);
+        // Canvas reference
+        // origin is upper right
+        // coordinates are x, y, width, height in that order
+        // to set a color: ctx.fillStyle = 'rgb(255, 255, 0)'
+        //                 ctx.fillStyle = 'Red'
+        //                 ctx.setFillColor(r, g, b, a);
+        //                 ctx.strokeStyle = 'rgb(100, 100, 100)';
 
-        //     // The 'v' or '@' need to be centered
-        //     p.getTextBounds(game.getHomeAway(), 0, game.getHomeAway().length(), bounds);
-        //     int haX = 675 - bounds.width()/2;
+        const title: string = teamTable[teamAbbrev].name + " Schedule";
 
-        //     canvas.drawText(game.getDay(),             20, yOffset, p);
-        //     canvas.drawText(game.getDate(),            220, yOffset, p);
-        //     if (!game.getStatus().equals("OFF")) {
-        //         canvas.drawText(team.toUpperCase(), 510, yOffset, p);
-        //         canvas.drawText(game.getHomeAway(), haX, yOffset, p);
-        //         canvas.drawText(game.getOpponent(), 730, yOffset, p);
-        //     }
-        //     canvas.drawText(game.getText(), 930, yOffset, p);
-        // }
+        // Fill the bitmap
+        ctx.fillStyle = backgroundColor;
+        ctx.lineWidth = boarderStrokeWidth;
+        ctx.fillRect(0, 0, imageWidth, imageHeight);
 
-        // if (atLeastOneGame) {
-        //     return imageBitmap;
-        // } else {
-        //     return null;
-        // }
+        // Draw the title
+        ctx.fillStyle = textColor;
+        ctx.font = titleFont;
+        const textWidth: number = ctx.measureText(title).width;
+        ctx.fillText(title, (imageWidth - textWidth) / 2, TitleOffset);       
 
-    }
+        // Draw the outline
+        ctx.strokeStyle = DrawingColor;
+        ctx.lineWidth   = OutlineStrokeWidth;
+        ctx.strokeRect(0, 0, imageWidth, imageHeight);        
+
+        // Draw the box for today.  Make it bigger if its a double header
+        let boxHeight: number = boxHeight1;
+        if (this.dayList[2].games.length == 2) {
+            boxHeight = boxHeight2;
+        } 
+
+        const boxWidth = imageWidth - boxHorMargin * 2;
+        const boxLeftX = boxHorMargin;
+        
+        // Draw the box
+        ctx.strokeStyle = DrawingColor;
+        ctx.lineWidth = boxStrokeWidth;
+        ctx.strokeRect(boxLeftX, boxTopY, boxWidth, boxHeight);
+
+        console.log("7 slots are filled and ready to render the image.");
+
+        let atLeastOneGame: boolean = false;
+        for (let gameIndex: number = 0; gameIndex <= 6; gameIndex++) {
+            let left: number = 0;
+            let top: number = 0;
+            let right: number = 0;
+            let bottom: number = 0;
+
+            let yOffset: number = firstGameYOffset + (gameIndex * gameYOffset);
+
+            let game: any = gameList[gameIndex];
+
+            let gameDay = game.day;
+            let gameDate = game.date;
+
+            if (game.status !== "OFF") {                
+                ctx.fillStyle = textColor;
+                ctx.font = gamesFont;
+                
+                let opponent: string = "";
+                let usRuns: number = 0;
+                let themRuns: number = 0;
+                let homeAway: string = "";
+                let topStr: string = ""; 
+                let gameTime: string = "";
+
+                if (game.home_name_abbrev == teamAbbrev) {
+                    opponent = game.away_name_abbrev;
+                    gameTime = game.home_time;
+                    homeAway = "v";
+                } else {
+                    opponent = game.home_name_abbrev;
+                    gameTime = game.away_time;
+                    homeAway = "@";
+                }
+
+                if (game.top_inning == "Y") {
+                    topStr = "\u25B2"; // up arrow
+                } else {
+                    topStr = "\u25BC"; // down arrow
+                }
+                
+                let gameText: string = "";
+                switch (game.status) {
+                    case "In Progress":
+                        if (game.home_name_abbrev == teamAbbrev) {
+                            usRuns   = game.home_team_runs;
+                            themRuns = game.away_team_runs;
+                        } else {
+                            usRuns   = game.away_team_runs;
+                            themRuns = game.home_team_runs
+                        }
+            
+                        if (game.top_inning == "Y") {
+                            topStr = "\u25B2"; // up arrow
+                        } else {
+                            topStr = "\u25BC"; // down arrow
+                        }
+
+                        gameText = usRuns + "-" + themRuns + "    " + topStr + game.inning;
+                        break;
+                    case "Warmup":
+                        gameText = "Warm up";
+                        break;
+                    case "Pre-game":                    
+                    case "Preview":
+                    case "Scheduled":
+                        gameText = gameTime;
+                        break;
+                    case "Final":
+                    case "Game Over":
+                        if (game.home_name_abbrev == teamAbbrev) {
+                            usRuns   = game.home_team_runs;
+                            themRuns = game.away_team_runs;
+                        } else {
+                            usRuns   = game.away_team_runs;
+                            themRuns = game.home_team_runs
+                        }
+
+                        gameText = usRuns + "-" + themRuns + " F";
+                        break
+                    case "Postponed":
+                        gameText = "PPD"
+                        break;
+                    default:
+                        gameText = game.status;
+                        break;
+                }
+            
+                
+                
+
+                
+
+                // The 'v' or '@' need to be centered
+                const textWidth: number = ctx.measureText(homeAway).width;
+                let homeAwayX = homeAwayXOffset - textWidth/2;   
+
+                ctx.fillText(gameDay,    dayXOffset,      yOffset);
+                ctx.fillText(gameDate,   dateXOffset,     yOffset);
+                ctx.fillText(teamAbbrev, teamXOffset,     yOffset);
+                ctx.fillText(homeAway,   homeAwayX,       yOffset);
+                ctx.fillText(opponent,   opponentXOffset, yOffset);
+                ctx.fillText(gameText,   gameTextXOffset, yOffset);
+            } else {
+                // No game
+                ctx.fillText(gameDay,    dayXOffset,      yOffset);
+                ctx.fillText(gameDate,   dateXOffset,     yOffset);
+                ctx.fillText("Off",      gameTextXOffset, yOffset);
+            }
+            
+
+// "away_file_code": "la",     
+    // "away_loss": "33",          
+    // "away_name_abbrev": "LAD",  
+    // "away_team_runs": "",       
+    // "away_time": "4:05",        
+    // "away_win": "63",           
+    // "game_type": "R",           
+    // "home_loss": "46",          
+    // "home_name_abbrev": "PHI",  
+    // "home_team_runs": "",       
+    // "home_win": "48",           
+    // "inning": "",               
+    // "series": "Regular Season", 
+    // "status": "Scheduled",      
+    // "top_inning": "N"        
+
+            
+        }
+
+    
 
     // public async getImageStreamXXX() {
     //     this.weatherData = new WeatherData(this.weatherConfig);
@@ -473,8 +609,8 @@ module.exports = class WeatherImage {
 
 
 
-    //     // PNG-encoded, zlib compression level 3 for faster compression but bigger files, no filtering
-    //     // const buf2 = canvas.toBuffer('image/png', { compressionLevel: 3, filters: canvas.PNG_FILTER_NONE })
-    //     return canvas.createPNGStream();
-    // }
+        // PNG-encoded, zlib compression level 3 for faster compression but bigger files, no filtering
+        // const buf2 = canvas.toBuffer('image/png', { compressionLevel: 3, filters: canvas.PNG_FILTER_NONE })
+        return canvas.createPNGStream();
+    }
 }
