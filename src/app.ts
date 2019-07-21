@@ -1,34 +1,26 @@
 // lib/app.ts
-import express = require('express');
-//const BaseballData = require('./baseballdata');
-const BaseballImage = require('./baseballimage');
-const fs = require('fs');
-const stream = require('stream');
-const util = require('util');
+import fs = require('fs');
+import stream = require('stream');
+import util = require('util');
 
-const teamTable = require('./teams.json');
+const BaseballImage = require('./baseballimage');
+const teamTable = require('../teams.json');
 
 // Create a new express application instance
 async function run() {
-
     const baseballImage = new BaseballImage();
-    
-    
-
 
     const teams = Object.keys(teamTable);
 
     for (const team of teams) {
+        // tslint:disable-next-line:no-console
         console.log(`Starting process for team:  ${team}`)
     
         const imageStream = await baseballImage.getImageStream(team);
-        console.log("got imagestream");
-
-        // console.log("__dirname: " + __dirname);
         
+        // tslint:disable-next-line:no-console
         console.log("`Writing: " + __dirname +'/../teams/' + team + '.png')
         const out = fs.createWriteStream(__dirname +'/../teams/' + team + '.png');
-
 
         const finished = util.promisify(stream.finished);
 
@@ -37,7 +29,6 @@ async function run() {
         out.on('finish', () =>  console.log('The PNG file was created.\n'));
 
         await finished(out);
-
     }
 }
 
