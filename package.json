@@ -39,6 +39,7 @@
     "tslint-config-prettier": "^1.18.0"
   },
   "files": [
-    "build/**/*"
+    "build/**/*",
+    "teams.json"
   ]
 }
