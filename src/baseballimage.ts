@@ -91,7 +91,7 @@ module.exports = class BaseballImage {
         const DrawingColor: string        = teamTable[teamAbbrev].color2; // 'rgb(200, 200, 200)';
         const textColor: string           = teamTable[teamAbbrev].color3; // 'white';
 
-        const TitleOffset: number         = 100;
+        const TitleOffset: number         = 120;
 
         const boxHeight1: number          = 110;
         const boxHeight2: number          = 200; // Double header
