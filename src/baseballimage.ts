@@ -16,6 +16,15 @@ module.exports = class BaseballImage {
         this.baseballData = new BaseballData();
         this.dayList = [];
 
+        // The teamTable has some extra entries that point to a different abbreviation to lookup
+        let teamLookup: string = "";
+        const redirect: string = teamTable[teamAbbrev].redirect;
+        if (redirect !== undefined) {
+            teamLookup = redirect;
+        } else {
+            teamLookup = teamAbbrev;
+        }
+
         // let day = await baseballData.getDate(new Date(), teamAbbrev); // Test the cache
 
         // Get date 2 days ago through 4 days from now.  7 Days total
@@ -25,7 +34,7 @@ module.exports = class BaseballImage {
 
             // tslint:disable-next-line:no-console
             console.log("[" + teamAbbrev + "] Requesting game for date: " + requestDate);
-            const day = await this.baseballData.getDate(requestDate, teamAbbrev);
+            const day = await this.baseballData.getDate(requestDate, teamLookup);
             this.dayList.push(day);
         }
 
@@ -161,7 +170,7 @@ module.exports = class BaseballImage {
                 let topStr: string = ""; 
                 let gameTime: string = "";
 
-                if (game.home_name_abbrev === teamAbbrev) {
+                if (game.home_name_abbrev === teamLookup) {
                     opponent = game.away_name_abbrev;
                     gameTime = game.home_time;
                     homeAway = "v";
@@ -223,7 +232,7 @@ module.exports = class BaseballImage {
 
                 ctx.fillText(gameDay,    dayXOffset,      yOffset);
                 ctx.fillText(gameDate,   dateXOffset,     yOffset);
-                ctx.fillText(teamAbbrev, teamXOffset,     yOffset);
+                ctx.fillText(teamLookup, teamXOffset,     yOffset);
                 ctx.fillText(homeAway,   homeAwayX,       yOffset);
                 ctx.fillText(opponent,   opponentXOffset, yOffset);
                 ctx.fillText(gameText,   gameTextXOffset, yOffset);

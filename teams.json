@@ -178,5 +178,12 @@
         "color1": "#AB0003",
         "color2": "#FFFFFF",
         "color3": "#14225A"
+    },
+    "FENWAY" : {
+        "name": "Boston Red Sox", 
+        "redirect": "BOS",       
+        "color1": "#4f7359",
+        "color2": "#E0E0E0",
+        "color3": "#E0E0E0"
     }
 }
