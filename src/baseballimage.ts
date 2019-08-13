@@ -151,6 +151,9 @@ module.exports = class BaseballImage {
         ctx.lineWidth = boxStrokeWidth;
         ctx.strokeRect(boxLeftX, boxTopY, boxWidth, boxHeight);
 
+        // How long is this image good for
+        let goodForMins = 60;
+
         for (let gameIndex: number = 0; gameIndex <= 6; gameIndex++) {
             const yOffset: number = firstGameYOffset + (gameIndex * gameYOffset);
 
@@ -198,14 +201,17 @@ module.exports = class BaseballImage {
                         }
 
                         gameText = usRuns + "-" + themRuns + "    " + topStr + game.inning;
+                        goodForMins = 10;
                         break;
                     case "Warmup":
                         gameText = "Warm up";
+                        goodForMins = 30;
                         break;
                     case "Pre-game":                    
                     case "Preview":
                     case "Scheduled":
                         gameText = gameTime;
+                        goodForMins = 60;
                         break;
                     case "Final":
                     case "Game Over":
@@ -218,9 +224,15 @@ module.exports = class BaseballImage {
                         }
 
                         gameText = usRuns + "-" + themRuns + " F";
+                        goodForMins = 240;
                         break
                     case "Postponed":
-                        gameText = "PPD"
+                        gameText = "PPD";
+                        goodForMins = 240;
+                        break;
+                    case "Suspended":
+                        gameText = "SPND"
+                        goodForMins = 240;
                         break;
                     default:
                         gameText = game.status;
@@ -244,6 +256,12 @@ module.exports = class BaseballImage {
             }            
         }
 
-        return canvas.createPNGStream();
+        let expires = new Date();
+        expires.setMinutes(expires.getMinutes() + goodForMins);
+
+        return {
+            expires: expires.toUTCString(),
+            stream: canvas.createPNGStream()
+        }
     }
 }

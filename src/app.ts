@@ -16,10 +16,11 @@ async function run() {
         // tslint:disable-next-line:no-console
         console.log(`Starting process for team:  ${team}`)
     
-        const imageStream = await baseballImage.getImageStream(team);
+        const result = await baseballImage.getImageStream(team);
+        const imageStream = result.stream;
         
         // tslint:disable-next-line:no-console
-        console.log("`Writing: " + __dirname +'/../teams/' + team + '.png')
+        console.log("`Writing: " + __dirname +'/../teams/' + team + '.png ' + result.expires)
         const out = fs.createWriteStream(__dirname +'/../teams/' + team + '.png');
 
         const finished = util.promisify(stream.finished);
