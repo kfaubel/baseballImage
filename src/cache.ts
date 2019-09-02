@@ -3,6 +3,12 @@ import fs = require('fs');
 module.exports = class Cache {
     private static cache: any = {}; 
 
+    private static logger;
+
+    public static setLogger(logger: any) {
+        this.logger = logger;
+    }
+
     public static get(key: any) {
         if (Cache.cache[key] !== undefined) {
             const cacheItem: any = Cache.cache[key];
@@ -13,14 +19,14 @@ module.exports = class Cache {
             const now = new Date();
             if (expiration > now.getTime()) {
                 // object is current
-                console.log("Key: " + key + " - cache hit");
+                this.logger.verbose("Key: " + key + " - cache hit");
                 return object;
             } else {
                 // object expired
-                console.log("Key: " + key + " - cache expired");
+                this.logger.verbose("Key: " + key + " - cache expired");
             }
         } else {
-            console.log("Key: " + key + " - cache miss");
+            this.logger.verbose("Key: " + key + " - cache miss");
         }
 
         return null;

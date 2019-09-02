@@ -29,8 +29,11 @@ const cache = require('./cache');
     // "top_inning": "N"           
 
 module.exports = class BaseballData {
-    constructor() {
-        //
+    private logger;
+
+    constructor(logger: any) {
+        this.logger = logger;
+        cache.setLogger(logger);
     }
     
     public async getDate(gameDate, theTeam: string) {        
@@ -50,7 +53,7 @@ module.exports = class BaseballData {
         if (baseballJson == null) {
             const url = `https://gd2.mlb.com/components/game/mlb/year_${gameDayObj.year}/month_${gameDayObj.month}/day_${gameDayObj.day}/miniscoreboard.json`;
 
-            console.log("[" + theTeam + "] Did NOT Find key: " + key);
+            this.logger.info("Cache Lookup for: " + theTeam + " -  Miss: " + key);
             // tslint:disable-next-line:no-console
             //console.log("URL: " + url);
 
@@ -102,7 +105,7 @@ module.exports = class BaseballData {
                 .catch((error: string) => {
                     // handle error
                     // tslint:disable-next-line:no-console
-                    console.log("Error: " + error);
+                    this.logger.error("Error: " + error);
                 })            
         }
         const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

@@ -1,19 +1,25 @@
 const { createCanvas, loadImage } = require('canvas');
 const BaseballData = require('./baseballdata');
 
-const teamTable = require('../teams.json');
+const teamTable = require('../teams.json'); 
 
 module.exports = class BaseballImage {
     private baseballData: any;
     private dayList: any[] = [];
 
-    constructor() {
-       // console.log("Constructing BaseballImage") 
+    private logger;
+
+    constructor(logger: any) {
+        this.logger = logger;
+    }
+
+    public setLogger(logger: any) {
+        this.logger = logger;
     }
 
     public async getImageStream(teamAbbrev: string) {        
         
-        this.baseballData = new BaseballData();
+        this.baseballData = new BaseballData(this.logger);
         this.dayList = [];
 
         // The teamTable has some extra entries that point to a different abbreviation to lookup
@@ -33,7 +39,7 @@ module.exports = class BaseballImage {
             requestDate.setDate(requestDate.getDate() + dayIndex);
 
             // tslint:disable-next-line:no-console
-            console.log("[" + teamAbbrev + "] Requesting game for date: " + requestDate);
+            this.logger.info("[" + teamAbbrev + "] Requesting game for date: " + requestDate.toDateString());
             const day = await this.baseballData.getDate(requestDate, teamLookup);
             this.dayList.push(day);
         }
