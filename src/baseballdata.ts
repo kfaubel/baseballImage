@@ -55,7 +55,7 @@ module.exports = class BaseballData {
 
             this.logger.info("Cache Lookup for: " + theTeam + " -  Miss: " + key);
             // tslint:disable-next-line:no-console
-            //console.log("URL: " + url);
+            this.logger.info("URL: " + url);
 
             // const headers = {
             //     'Access-Control-Allow-Origin': '*',
@@ -111,16 +111,20 @@ module.exports = class BaseballData {
         const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const months   = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        if (baseballJson !== null) {
-            let game: any = null;
-            for (game of baseballJson.data.games.game) {
-                if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
-                    //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
-                    game.day = weekdays[gameDate.getDay()];
-                    game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
-                    gameDayObj.games.push(game);
+        try {
+            if (baseballJson !== null) {
+                let game: any = null;
+                for (game of baseballJson.data.games.game) {
+                    if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
+                        //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
+                        game.day = weekdays[gameDate.getDay()];
+                        game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
+                        gameDayObj.games.push(game);
+                    }
                 }
             }
+        } catch (e) {
+            this.logger.error("Error processing, baseballJson from site.  Did the result format change?")
         }
 
         // For whatever reason
