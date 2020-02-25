@@ -119,6 +119,19 @@ module.exports = class BaseballData {
                         //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
                         game.day = weekdays[gameDate.getDay()];
                         game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
+
+                        // fix up game time (missing in spring training games)
+                        if (typeof game.away_time === 'undefined') {
+                            game.away_time = game.event_time;
+                            game.home_time = game.event_time;
+                        }
+                        
+                        // fix up runs (missing in spring training games)
+                        if (typeof game.home_team_runs === 'undefined') {
+                            game.home_team_runs = game.home_score;
+                            game.away_team_runs = game.away_score;
+                        }
+
                         gameDayObj.games.push(game);
                     }
                 }

@@ -219,8 +219,9 @@ module.exports = class BaseballImage {
                         gameText = gameTime;
                         goodForMins = 60;
                         break;
-                    case "Final":
-                    case "Game Over":
+                        case "Final":
+                        case "Final: Tied":
+                        case "Game Over":
                         if (game.home_name_abbrev === teamAbbrev) {
                             usRuns   = game.home_team_runs;
                             themRuns = game.away_team_runs;
