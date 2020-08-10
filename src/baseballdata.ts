@@ -119,7 +119,7 @@ module.exports = class BaseballData {
                         //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
                         game.day = weekdays[gameDate.getDay()];
                         game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
-
+                      
                         // fix up game time (missing in spring training games)
                         if (typeof game.away_time === 'undefined') {
                             game.away_time = game.event_time;

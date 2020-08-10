@@ -31,6 +31,10 @@ module.exports = class BaseballImage {
             teamLookup = teamAbbrev;
         }
 
+        const backgroundColor: string     = teamTable[teamAbbrev].color1; // 'rgb(71, 115, 89)'; // 0xff4f7359 - Fenway green
+        const DrawingColor: string        = teamTable[teamAbbrev].color2; // 'rgb(200, 200, 200)';
+        const textColor: string           = teamTable[teamAbbrev].color3; // 'white';
+
         // let day = await baseballData.getDate(new Date(), teamAbbrev); // Test the cache
 
         // Get date 2 days ago through 4 days from now.  7 Days total
@@ -39,7 +43,7 @@ module.exports = class BaseballImage {
             requestDate.setDate(requestDate.getDate() + dayIndex);
 
             // tslint:disable-next-line:no-console
-            this.logger.info("[" + teamAbbrev + "] Requesting game for date: " + requestDate.toDateString());
+            this.logger.info("[" + teamLookup + "] Requesting game for date: " + requestDate.toDateString());
             const day = await this.baseballData.getDate(requestDate, teamLookup);
             this.dayList.push(day);
         }
@@ -93,10 +97,6 @@ module.exports = class BaseballImage {
         const boarderStrokeWidth: number  = 30;
         const boxStrokeWidth: number      = 10;
 
-        const backgroundColor: string     = teamTable[teamAbbrev].color1; // 'rgb(71, 115, 89)'; // 0xff4f7359 - Fenway green
-        const DrawingColor: string        = teamTable[teamAbbrev].color2; // 'rgb(200, 200, 200)';
-        const textColor: string           = teamTable[teamAbbrev].color3; // 'white';
-
         const TitleOffset: number         = 120;
 
         const boxHeight1: number          = 110;
@@ -110,7 +110,7 @@ module.exports = class BaseballImage {
         const dayXOffset: number        = 40;
         const dateXOffset: number       = 320;
         const teamXOffset: number       = 700;
-        const homeAwayXOffset: number   = 950;
+        const homeAwayXOffset: number   = 955;
         const opponentXOffset: number   = 1050;
         const gameTextXOffset: number   = 1300;
 
@@ -125,7 +125,7 @@ module.exports = class BaseballImage {
         //                 ctx.setFillColor(r, g, b, a);
         //                 ctx.strokeStyle = 'rgb(100, 100, 100)';
 
-        const title: string = teamTable[teamAbbrev].name + " Schedule";
+        const title: string = teamTable[teamLookup].name + " Schedule";
 
         // Fill the bitmap
         ctx.fillStyle = backgroundColor;
@@ -192,7 +192,7 @@ module.exports = class BaseballImage {
                 let gameText: string = "";
                 switch (game.status) {
                     case "In Progress":
-                        if (game.home_name_abbrev === teamAbbrev) {
+                        if (game.home_name_abbrev === teamLookup) {
                             usRuns   = game.home_team_runs;
                             themRuns = game.away_team_runs;
                         } else {
@@ -222,7 +222,7 @@ module.exports = class BaseballImage {
                         case "Final":
                         case "Final: Tied":
                         case "Game Over":
-                        if (game.home_name_abbrev === teamAbbrev) {
+                        if (game.home_name_abbrev === teamLookup) {
                             usRuns   = game.home_team_runs;
                             themRuns = game.away_team_runs;
                         } else {
@@ -263,7 +263,7 @@ module.exports = class BaseballImage {
             }            
         }
 
-        let expires = new Date();
+        const expires = new Date();
         expires.setMinutes(expires.getMinutes() + goodForMins);
 
         return {
