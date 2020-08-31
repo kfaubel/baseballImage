@@ -1,3 +1,5 @@
+// tslint:disable: object-literal-sort-keys
+// tslint:disable: no-var-requires
 const { createCanvas, loadImage } = require('canvas');
 const BaseballData = require('./baseballdata');
 
@@ -7,7 +9,7 @@ module.exports = class BaseballImage {
     private baseballData: any;
     private dayList: any[] = [];
 
-    private logger;
+    private logger: any;
 
     constructor(logger: any) {
         this.logger = logger;
@@ -43,7 +45,7 @@ module.exports = class BaseballImage {
             requestDate.setDate(requestDate.getDate() + dayIndex);
 
             // tslint:disable-next-line:no-console
-            this.logger.info("[" + teamLookup + "] Requesting game for date: " + requestDate.toDateString());
+            this.logger.info("[" + teamAbbrev + " (" + teamLookup + ")" + "] Requesting game for date: " + requestDate.toDateString());
             const day = await this.baseballData.getDate(requestDate, teamLookup);
             this.dayList.push(day);
         }

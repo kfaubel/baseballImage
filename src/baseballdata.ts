@@ -1,3 +1,5 @@
+// tslint:disable: object-literal-sort-keys
+// tslint:disable: no-var-requires
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
 
 const convert = require('xml-js');
@@ -39,6 +41,7 @@ module.exports = class BaseballData {
     public async getDate(gameDate, theTeam: string) {        
         const gameDayObj: any = {
             year: gameDate.getFullYear(),                            // 2019
+            
             month: ('00' + (gameDate.getMonth() +1)).slice(-2),      // 10       getMonth() returns 0-11
             day: ('00' + gameDate.getDate()).slice(-2),              // 04       *clever* way to prepend leading 0s
             games: [] as any[] // Not very satisfing but does prevent an inferred "never" error below
@@ -91,7 +94,7 @@ module.exports = class BaseballData {
                         }
                     }
 
-                    let nowMs: number = new Date().getTime();
+                    const nowMs: number = new Date().getTime();
                     let expirationMs: number = nowMs + 6 * 60 * 60 * 1000; // 6 hours
 
                     if (anyActive) {
@@ -116,7 +119,7 @@ module.exports = class BaseballData {
                 let game: any = null;
                 for (game of baseballJson.data.games.game) {
                     if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
-                        //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
+                        // console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
                         game.day = weekdays[gameDate.getDay()];
                         game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
                       
