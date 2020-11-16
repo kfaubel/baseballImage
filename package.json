@@ -1,16 +1,17 @@
 {
   "name": "baseballimage",
-  "version": "1.0.0",
+  "version": "1.0.9",
   "description": "Web service to retreive MLB 'standings' images for teams",
   "main": "index.js",
   "scripts": {
-    "tsc": "tsc",
-    "build": "npm run tsc",
-    "start": "ts-node src/app.ts",
-    "dev": "ts-node-dev --respawn --transpileOnly ./src/app.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "start": "npm run test",
+    "test": "ts-node tests/app.ts",
+    "build": "tsc",
     "prepare": "npm run build",
+    "publish": "echo Published.",
+    "install": "echo Installed.",
+    "dev": "ts-node-dev --respawn --transpileOnly ./src/app.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
   },
   "repository": {

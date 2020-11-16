@@ -67,31 +67,35 @@ module.exports = class BaseballData {
         
             await axios.get(url)
                 .then((response: any) => {
-                    // handle success
                     baseballJson = response.data;
-                    // console.log("MLB response data: " + JSON.stringify(baseballJson, null, 4));
+
+                    // console.log("MLB response data: " + JSON.stringify(response.data, null, 4));
 
                     let anyActive: boolean = false;
                     let anyStillToPlay: boolean = false;
 
-                    for (const game of baseballJson.data.games.game) {
-                        switch (game.status) {
-                            case "In Progress":
-                                anyActive = true;
-                                break;
-                            case "Warmup":
-                            case "Pre-game":                    
-                            case "Preview":
-                            case "Scheduled":
-                                anyStillToPlay = true;
-                                break;
-                            case "Final":
-                            case "Game Over":
-                                break;
-                            default:
-                                anyStillToPlay = true;
-                                break;
+                    if (Array.isArray(baseballJson.data.games.game)) {
+                        for (const game of baseballJson.data.games.game) {
+                            switch (game.status) {
+                                case "In Progress":
+                                    anyActive = true;
+                                    break;
+                                case "Warmup":
+                                case "Pre-game":                    
+                                case "Preview":
+                                case "Scheduled":
+                                    anyStillToPlay = true;
+                                    break;
+                                case "Final":
+                                case "Game Over":
+                                    break;
+                                default:
+                                    anyStillToPlay = true;
+                                    break;
+                            }
                         }
+                    } else {
+                        this.logger.info("No games");
                     }
 
                     const nowMs: number = new Date().getTime();
@@ -105,55 +109,55 @@ module.exports = class BaseballData {
 
                     cache.set(key, baseballJson, expirationMs);
                 })
-                .catch((error: string) => {
+                .catch((error: any) => {
                     // handle error
                     // tslint:disable-next-line:no-console
-                    this.logger.error("Error: " + error);
+                    this.logger.error("Error: " + error + " " + error.stack);
                 })            
-        }
-        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const months   = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            }
+            const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const months   = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        try {
-            if (baseballJson !== null) {
-                let game: any = null;
-                for (game of baseballJson.data.games.game) {
-                    if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
-                        // console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
-                        game.day = weekdays[gameDate.getDay()];
-                        game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
-                      
-                        // fix up game time (missing in spring training games)
-                        if (typeof game.away_time === 'undefined') {
-                            game.away_time = game.event_time;
-                            game.home_time = game.event_time;
-                        }
+            try {
+                if (baseballJson !== null && Array.isArray(baseballJson.data.games.game)) {
+                    let game: any = null;
+                    for (game of baseballJson.data.games.game) {
+                        if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
+                            console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
+                            game.day = weekdays[gameDate.getDay()];
+                            game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
                         
-                        // fix up runs (missing in spring training games)
-                        if (typeof game.home_team_runs === 'undefined') {
-                            game.home_team_runs = game.home_score;
-                            game.away_team_runs = game.away_score;
-                        }
+                            // fix up game time (missing in spring training games)
+                            if (typeof game.away_time === 'undefined') {
+                                game.away_time = game.event_time;
+                                game.home_time = game.event_time;
+                            }
+                            
+                            // fix up runs (missing in spring training games)
+                            if (typeof game.home_team_runs === 'undefined') {
+                                game.home_team_runs = game.home_score;
+                                game.away_team_runs = game.away_score;
+                            }
 
-                        gameDayObj.games.push(game);
+                            gameDayObj.games.push(game);
+                        }
                     }
                 }
+            } catch (e) {
+                this.logger.error("Error processing, baseballJson from site.  Did the result format change?");
             }
-        } catch (e) {
-            this.logger.error("Error processing, baseballJson from site.  Did the result format change?")
-        }
 
-        // For whatever reason
-        if (gameDayObj.games.length === 0) {
-            const dayStr = weekdays[gameDate.getDay()];
-            const dateStr = months[gameDate.getMonth()] + " " + gameDate.getDate();
-            const game = {status: "OFF", day: dayStr, date: dateStr};
-            gameDayObj.games.push(game);
-        }
+            // For whatever reason
+            if (gameDayObj.games.length === 0) {
+                const dayStr = weekdays[gameDate.getDay()];
+                const dateStr = months[gameDate.getMonth()] + " " + gameDate.getDate();
+                const game = {status: "OFF", day: dayStr, date: dateStr};
+                gameDayObj.games.push(game);
+            }
 
-        // tslint:disable-next-line:no-console
-        // console.log("Game Day: " + JSON.stringify(gameDayObj, null, 4));
-        
-        return gameDayObj;
-    }
+            // tslint:disable-next-line:no-console
+            // console.log("Game Day: " + JSON.stringify(gameDayObj, null, 4));
+            
+            return gameDayObj;
+        }
 }

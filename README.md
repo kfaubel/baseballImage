@@ -5,9 +5,9 @@ Generate a Baseball schedule image for a given MLB team.  This image is particua
 ```
 git clone https://github.com/kfaubel/baseballImage.git
 
-npm install
+npm install  # Runs the prepare step so its ready as a runtime component
 
-npm start # Runs the app.ts file with embedded parameters
+npm start    # Runs the app.ts file with embedded parameters
 ```
 # Usage
 This generates a 1920x1080 image that shows seven days/games including 2 previous and 4 in the future.  It also shows the current day and the score and inning if the game is in progress. 

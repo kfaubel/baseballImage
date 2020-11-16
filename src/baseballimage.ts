@@ -41,6 +41,7 @@ module.exports = class BaseballImage {
 
         // Get date 2 days ago through 4 days from now.  7 Days total
         for (let dayIndex: number = -2; dayIndex <= 4; dayIndex++) {      
+            // const requestDate = new Date("2019/09/10");    
             const requestDate = new Date();
             requestDate.setDate(requestDate.getDate() + dayIndex);
 

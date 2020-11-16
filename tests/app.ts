@@ -3,10 +3,10 @@ import fs = require('fs');
 import stream = require('stream');
 import util = require('util');
 
-const logger = require("./logger");
+const logger = require("../src/logger");
 logger.setLevel("verbose");
 
-const BaseballImage = require('./baseballimage');
+const BaseballImage = require('../src/baseballimage');
 const teamTable = require('../teams.json');
 
 // Create a new express application instance
