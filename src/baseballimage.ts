@@ -8,7 +8,7 @@ const BaseballData = require('./baseballdata');
 const pure = require('pureimage');
 const jpeg = require('jpeg-js');
 
-const teamTable = require('../teams.json'); 
+const teamTable = require('../../teams.json'); 
 
 module.exports = class BaseballImage {
     private baseballData: any;
