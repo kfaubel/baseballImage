@@ -8,7 +8,8 @@ const BaseballData = require('./baseballdata');
 const pure = require('pureimage');
 const jpeg = require('jpeg-js');
 
-const teamTable = require('../../teams.json'); 
+const teamTable = require(__dirname + '/teams.json'); 
+const fontDir = __dirname + "/fonts";
 
 module.exports = class BaseballImage {
     private baseballData: any;
@@ -108,9 +109,9 @@ module.exports = class BaseballImage {
         const mediumFont: string = "36px 'OpenSans-Bold'";   // axis labels
         const smallFont: string  = "24px 'OpenSans-Bold'";   // Legend at the top
 
-        const fntBold = pure.registerFont('fonts/OpenSans-Bold.ttf','OpenSans-Bold');
-        const fntRegular = pure.registerFont('fonts/OpenSans-Regular.ttf','OpenSans-Regular');
-        const fntRegular2 = pure.registerFont('fonts/alata-regular.ttf','alata-regular');
+        const fntBold     = pure.registerFont(fontDir + '/OpenSans-Bold.ttf','OpenSans-Bold');
+        const fntRegular  = pure.registerFont(fontDir + '/OpenSans-Regular.ttf','OpenSans-Regular');
+        const fntRegular2 = pure.registerFont(fontDir + '/alata-regular.ttf','alata-regular');
 
         fntBold.loadSync();
         fntRegular.loadSync();

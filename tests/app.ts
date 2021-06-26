@@ -17,8 +17,6 @@ async function run() {
     const teams = Object.keys(teamTable);
 
     for (let team of teams) {
-        team = "FENWAY";
-
         logger.info(`Starting process for team:  ${team}`)
     
         const result = await baseballImage.getImageStream(team);
@@ -36,11 +34,6 @@ async function run() {
         out.on('finish', () =>  logger.info('The jpg from a stream file was created.'));
 
         await finished(out); 
-
-        logger.info("done"); 
-
-        break
-
     }
 }
 
