@@ -8,8 +8,8 @@ const BaseballData = require('./baseballdata');
 const pure = require('pureimage');
 const jpeg = require('jpeg-js');
 
-const teamTable = require(__dirname + '../../teams.json'); 
-const fontDir = __dirname + "/fonts";
+const teamTable = require(__dirname + '/../teams.json'); 
+const fontDir = __dirname + "/../fonts";
 
 module.exports = class BaseballImage {
     private baseballData: any;
@@ -32,11 +32,21 @@ module.exports = class BaseballImage {
 
         // The teamTable has some extra entries that point to a different abbreviation to lookup
         let teamLookup: string = "";
-        const redirect: string = teamTable[teamAbbrev].redirect;
+        const teamInfo = teamTable[teamAbbrev.toUpperCase()];
+        if (teamInfo === undefined) {
+            return {
+                jpegImg: null,
+                stream: null,
+                expires: null,
+                error: `Team ${teamAbbrev} not found`
+            }
+        }
+
+        const redirect: string = teamTable[teamAbbrev.toUpperCase()].redirect;
         if (redirect !== undefined) {
             teamLookup = redirect;
         } else {
-            teamLookup = teamAbbrev;
+            teamLookup = teamAbbrev.toUpperCase();
         }
 
         const backgroundColor: string     = teamTable[teamAbbrev].color1; // 'rgb(71, 115, 89)'; // 0xff4f7359 - Fenway green
@@ -307,10 +317,6 @@ module.exports = class BaseballImage {
         const expires = new Date();
         expires.setMinutes(expires.getMinutes() + goodForMins);
 
-        //return {
-        //    expires: expires.toUTCString(),
-        //    stream: canvas.createPNGStream()
-        //}
         const jpegImg = await jpeg.encode(img, 50);
 
         const jpegStream = new stream.Readable({
@@ -323,7 +329,8 @@ module.exports = class BaseballImage {
         return {
             jpegImg: jpegImg,
             stream: jpegStream,
-            expires: expires.toUTCString()
+            expires: expires.toUTCString(),
+            error: ""
         }
     }
 }

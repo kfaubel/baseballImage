@@ -4,8 +4,8 @@
   "description": "Web service to retrieve MLB 'standings' images for teams",
   "main": "index.js",
   "scripts": {
-    "start": "npm run test",
-    "test": "ts-node tests/app.ts",
+    "start": "npm run build && ts-node src/test.ts",
+    "test": "ts-node src/test.ts",
     "build": "tsc",
     "prepare": "npm run build",
     "publish": "echo Published.",

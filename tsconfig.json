@@ -14,7 +14,13 @@
     "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "./build/",                        /* Redirect output structure to the directory. */
-    // "rootDir": "./",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "rootDir": "./src",         /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+                                              /* KTF
+                                                - I want the output to go directly in to build
+                                                - OutDir does this but without the rootDir set to ./src it adds an extra dir to outDit (build/src/foo.js)
+                                                - I don't really want the test app.js to be in the source folder although maybe that would be OK.
+                                                - I actually don't want it in outdir at all.
+                                               */
     // "composite": true,                     /* Enable project compilation */
     // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
     // "removeComments": true,                /* Do not emit comments to output. */
