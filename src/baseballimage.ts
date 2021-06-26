@@ -8,7 +8,7 @@ const BaseballData = require('./baseballdata');
 const pure = require('pureimage');
 const jpeg = require('jpeg-js');
 
-const teamTable = require(__dirname + '/teams.json'); 
+const teamTable = require(__dirname + '../../teams.json'); 
 const fontDir = __dirname + "/fonts";
 
 module.exports = class BaseballImage {
