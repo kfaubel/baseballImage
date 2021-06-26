@@ -44,7 +44,7 @@ module.exports = class BaseballData {
             
             month: ('00' + (gameDate.getMonth() +1)).slice(-2),      // 10       getMonth() returns 0-11
             day: ('00' + gameDate.getDate()).slice(-2),              // 04       *clever* way to prepend leading 0s
-            games: [] as any[] // Not very satisfing but does prevent an inferred "never" error below
+            games: [] as any[] // Not very satisfying but does prevent an inferred "never" error below
         }
         
         const key = gameDayObj.year + "_" + gameDayObj.month + "_" + gameDayObj.day;
@@ -59,17 +59,12 @@ module.exports = class BaseballData {
             this.logger.info("Cache Lookup for: " + theTeam + " -  Miss: " + key);
             // tslint:disable-next-line:no-console
             this.logger.info("URL: " + url);
-
-            // const headers = {
-            //     'Access-Control-Allow-Origin': '*',
-            //     'User-agent': this.agent
-            // };
         
             await axios.get(url)
                 .then((response: any) => {
                     baseballJson = response.data;
 
-                    // console.log("MLB response data: " + JSON.stringify(response.data, null, 4));
+                    //console.log("MLB response data: " + JSON.stringify(response.data, null, 4));
 
                     let anyActive: boolean = false;
                     let anyStillToPlay: boolean = false;
@@ -104,7 +99,7 @@ module.exports = class BaseballData {
                     if (anyActive) {
                         expirationMs = nowMs +  5 * 60 * 1000; // 5 minutes
                     } else if (anyStillToPlay) {
-                        expirationMs = nowMs + 60 * 60 * 1000; // 60 minutes
+                        expirationMs = nowMs + 60 * 60 * 1000; // 30 minutes
                     }
 
                     cache.set(key, baseballJson, expirationMs);

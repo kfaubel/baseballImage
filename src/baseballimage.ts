@@ -1,7 +1,12 @@
 // tslint:disable: object-literal-sort-keys
 // tslint:disable: no-var-requires
-const { createCanvas, loadImage } = require('canvas');
+
+import stream = require('stream');
+
+//const { createCanvas, loadImage } = require('canvas');
 const BaseballData = require('./baseballdata');
+const pure = require('pureimage');
+const jpeg = require('jpeg-js');
 
 const teamTable = require('../teams.json'); 
 
@@ -37,6 +42,7 @@ module.exports = class BaseballImage {
         const DrawingColor: string        = teamTable[teamAbbrev].color2; // 'rgb(200, 200, 200)';
         const textColor: string           = teamTable[teamAbbrev].color3; // 'white';
 
+        
         // let day = await baseballData.getDate(new Date(), teamAbbrev); // Test the cache
 
         // Get date 2 days ago through 4 days from now.  7 Days total
@@ -93,8 +99,22 @@ module.exports = class BaseballImage {
         const imageHeight: number = 1080; // 800;
         const imageWidth: number  = 1920; // 1280;
 
-        const titleFont: string = 'bold 90px sans-serif';   // Title
-        const gamesFont: string = 'bold 90px sans-serif';    // row of game data
+        // const titleFont: string = 'bold 90px sans-serif';   // Title
+        // const gamesFont: string = 'bold 90px sans-serif';    // row of game data
+        const titleFont: string = "90px 'OpenSans-Bold'";   // Title
+        const gamesFont: string = "90px 'OpenSans-Bold'";    // row of game data
+
+        const largeFont: string  = "48px 'OpenSans-Bold'";   // Title
+        const mediumFont: string = "36px 'OpenSans-Bold'";   // axis labels
+        const smallFont: string  = "24px 'OpenSans-Bold'";   // Legend at the top
+
+        const fntBold = pure.registerFont('fonts/OpenSans-Bold.ttf','OpenSans-Bold');
+        const fntRegular = pure.registerFont('fonts/OpenSans-Regular.ttf','OpenSans-Regular');
+        const fntRegular2 = pure.registerFont('fonts/alata-regular.ttf','alata-regular');
+
+        fntBold.loadSync();
+        fntRegular.loadSync();
+        fntRegular2.loadSync();
 
         const OutlineStrokeWidth: number  = 30;
         const boarderStrokeWidth: number  = 30;
@@ -105,9 +125,9 @@ module.exports = class BaseballImage {
         const boxHeight1: number          = 110;
         const boxHeight2: number          = 200; // Double header
         const boxHorMargin: number        = 30;
-        const boxTopY: number             = 450;
+        const boxTopY: number             = 440;
 
-        const firstGameYOffset: number    = 275;
+        const firstGameYOffset: number    = 265;
         const gameYOffset: number         = 130;
 
         const dayXOffset: number        = 40;
@@ -117,8 +137,11 @@ module.exports = class BaseballImage {
         const opponentXOffset: number   = 1050;
         const gameTextXOffset: number   = 1300;
 
-        const canvas = createCanvas(imageWidth, imageHeight);
-        const ctx = canvas.getContext('2d');
+        //const canvas = createCanvas(imageWidth, imageHeight);
+        //const ctx = canvas.getContext('2d');
+        const img = pure.make(imageWidth, imageHeight);
+        const ctx = img.getContext('2d');
+
 
         // Canvas reference
         // origin is upper right
@@ -144,7 +167,14 @@ module.exports = class BaseballImage {
         // Draw the outline
         ctx.strokeStyle = DrawingColor;
         ctx.lineWidth   = OutlineStrokeWidth;
-        ctx.strokeRect(0, 0, imageWidth, imageHeight);        
+        //ctx.strokeRect(0, 0, imageWidth, imageHeight); // Pure does not seem to use lineWidth in strokeRect
+        ctx.beginPath();
+        ctx.moveTo(0 + OutlineStrokeWidth/2, 0 + OutlineStrokeWidth/2);
+        ctx.lineTo(imageWidth, 0 + OutlineStrokeWidth/2);
+        ctx.lineTo(imageWidth, imageHeight);
+        ctx.lineTo(0 + OutlineStrokeWidth/2, imageHeight);
+        ctx.lineTo(0 + OutlineStrokeWidth/2, 0); // Y is all the way up to fill in the top corner
+        ctx.stroke();       
 
         // Draw the box for today.  Make it bigger if its a double header
         let boxHeight: number = boxHeight1;
@@ -152,13 +182,20 @@ module.exports = class BaseballImage {
             boxHeight = boxHeight2;
         } 
 
-        const boxWidth = imageWidth - boxHorMargin * 2;
+        const boxWidth = imageWidth - boxHorMargin;
         const boxLeftX = boxHorMargin;
         
         // Draw the box
         ctx.strokeStyle = DrawingColor;
         ctx.lineWidth = boxStrokeWidth;
-        ctx.strokeRect(boxLeftX, boxTopY, boxWidth, boxHeight);
+        //ctx.strokeRect(boxLeftX, boxTopY, boxWidth, boxHeight); // Pure does not seem to use lineWidth in strokeRect
+        ctx.beginPath();
+        ctx.moveTo(boxLeftX, boxTopY);
+        ctx.lineTo(boxWidth, boxTopY);
+        ctx.lineTo(boxWidth, boxTopY + boxHeight);
+        ctx.lineTo(boxLeftX, boxTopY + boxHeight);
+        ctx.lineTo(boxLeftX, boxTopY - boxStrokeWidth/2); // Fill in the little corner that was missed
+        ctx.stroke(); 
 
         // How long is this image good for
         let goodForMins = 60;
@@ -269,9 +306,23 @@ module.exports = class BaseballImage {
         const expires = new Date();
         expires.setMinutes(expires.getMinutes() + goodForMins);
 
+        //return {
+        //    expires: expires.toUTCString(),
+        //    stream: canvas.createPNGStream()
+        //}
+        const jpegImg = await jpeg.encode(img, 50);
+
+        const jpegStream = new stream.Readable({
+            read() {
+                this.push(jpegImg.data);
+                this.push(null);
+            }
+        })
+        
         return {
-            expires: expires.toUTCString(),
-            stream: canvas.createPNGStream()
+            jpegImg: jpegImg,
+            stream: jpegStream,
+            expires: expires.toUTCString()
         }
     }
 }

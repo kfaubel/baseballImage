@@ -9,40 +9,39 @@ logger.setLevel("verbose");
 const BaseballImage = require('../src/baseballimage');
 const teamTable = require('../teams.json');
 
+fs.mkdirSync(__dirname + '/../teams/', { recursive: true })
+
 // Create a new express application instance
 async function run() {
     const baseballImage = new BaseballImage(logger);
-
     const teams = Object.keys(teamTable);
 
-    for (const team of teams) {
-        // tslint:disable-next-line:no-console
+    for (let team of teams) {
+        team = "FENWAY";
+
         logger.info(`Starting process for team:  ${team}`)
     
         const result = await baseballImage.getImageStream(team);
-        const imageStream = result.stream;
-        
-        // tslint:disable-next-line:no-console
-        logger.info("Writing: ./teams/" + team + ".png, Expires: " + result.expires)
-        const out = fs.createWriteStream(__dirname +'/../teams/' + team + '.png');
+    
+        logger.info(`Writing from data: ./teams/${team}.jpg`);
+        // We now get result.jpegImg
+        fs.writeFileSync(__dirname +'/../teams/' + team + '.jpg', result.jpegImg.data);
 
+        logger.info(`Writing from stream: ./teams/${team}2.jpg`);
+
+        const out = fs.createWriteStream(__dirname +'/../teams/' + team + '2.jpg');
         const finished = util.promisify(stream.finished);
 
-        imageStream.pipe(out);
-        // tslint:disable-next-line:no-console
-        out.on('finish', () =>  logger.info('The PNG file was created.\n'));
+        result.stream.pipe(out);
+        out.on('finish', () =>  logger.info('The jpg from a stream file was created.'));
 
         await finished(out); 
+
+        logger.info("done"); 
+
+        break
+
     }
 }
 
-
 run();
-
-// app.get('/', function (req, res) {
-//   res.send('Hello World!');
-// });
-
-// app.listen(3000, function () {
-//   console.log('Example app listening on port 3000!');
-// });
