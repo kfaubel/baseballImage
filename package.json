@@ -1,7 +1,7 @@
 {
   "name": "baseballimage",
   "version": "1.0.9",
-  "description": "Web service to retreive MLB 'standings' images for teams",
+  "description": "Web service to retrieve MLB 'standings' images for teams",
   "main": "index.js",
   "scripts": {
     "start": "npm run test",
@@ -42,6 +42,7 @@
   },
   "files": [
     "build/**/*",
-    "teams.json"
+    "teams.json",
+    "fonts/**/*"
   ]
 }
