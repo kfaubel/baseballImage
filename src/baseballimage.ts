@@ -4,14 +4,15 @@
 import stream = require('stream');
 
 //const { createCanvas, loadImage } = require('canvas');
-const BaseballData = require('./baseballdata');
+//const BaseballData = require('./baseballdata');
+import { BaseballData } from './baseballdata';
 const pure = require('pureimage');
 const jpeg = require('jpeg-js');
 
 const teamTable = require(__dirname + '/../teams.json'); 
 const fontDir = __dirname + "/../fonts";
 
-module.exports = class BaseballImage {
+export class BaseballImage {
     private baseballData: any;
     private dayList: any[] = [];
 

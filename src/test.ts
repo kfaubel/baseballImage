@@ -6,7 +6,8 @@ import util = require('util');
 const logger = require("../src/logger");
 logger.setLevel("verbose");
 
-const BaseballImage = require('./baseballimage');
+//const BaseballImage = require('./baseballimage');
+import { BaseballImage } from './baseballimage';
 const teamTable = require('../teams.json');
 
 fs.mkdirSync(__dirname + '/../teams/', { recursive: true })

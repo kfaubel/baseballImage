@@ -30,7 +30,7 @@ const cache = require('./cache');
     // "status": "Scheduled",      
     // "top_inning": "N"           
 
-module.exports = class BaseballData {
+export class BaseballData {
     private logger;
 
     constructor(logger: any) {
