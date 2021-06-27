@@ -19,14 +19,14 @@ module.exports = class Cache {
             const now = new Date();
             if (expiration > now.getTime()) {
                 // object is current
-                this.logger.verbose("Key: " + key + " - cache hit");
+                // this.logger.verbose("Key: " + key + " - cache hit");
                 return object;
             } else {
                 // object expired
-                this.logger.verbose("Key: " + key + " - cache expired");
+                // this.logger.verbose("Key: " + key + " - cache expired");
             }
         } else {
-            this.logger.verbose("Key: " + key + " - cache miss");
+            // this.logger.verbose("Key: " + key + " - cache miss");
         }
 
         return null;

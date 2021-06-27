@@ -6,7 +6,7 @@ import util = require('util');
 const logger = require("../src/logger");
 logger.setLevel("verbose");
 
-const BaseballImage = require('../src/baseballimage');
+const BaseballImage = require('./baseballimage');
 const teamTable = require('../teams.json');
 
 fs.mkdirSync(__dirname + '/../teams/', { recursive: true })
@@ -17,23 +17,23 @@ async function run() {
     const teams = Object.keys(teamTable);
 
     for (let team of teams) {
-        logger.info(`Starting process for team:  ${team}`)
+        logger.info(`test.ts: Requesting image for:  ${team}`)
     
         const result = await baseballImage.getImageStream(team);
     
-        logger.info(`Writing from data: ./teams/${team}.jpg`);
+        logger.info(`test.ts: Writing: ./teams/${team}.jpg`);
         // We now get result.jpegImg
         fs.writeFileSync(__dirname +'/../teams/' + team + '.jpg', result.jpegImg.data);
 
-        logger.info(`Writing from stream: ./teams/${team}2.jpg`);
+        // logger.info(`Writing from stream: ./teams/${team}2.jpg`);
 
-        const out = fs.createWriteStream(__dirname +'/../teams/' + team + '2.jpg');
-        const finished = util.promisify(stream.finished);
+        // const out = fs.createWriteStream(__dirname +'/../teams/' + team + '2.jpg');
+        // const finished = util.promisify(stream.finished);
 
-        result.stream.pipe(out);
-        out.on('finish', () =>  logger.info('The jpg from a stream file was created.'));
+        // result.stream.pipe(out);
+        // out.on('finish', () =>  logger.info('The jpg from a stream file was created.'));
 
-        await finished(out); 
+        // await finished(out); 
     }
 }
 

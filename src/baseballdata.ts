@@ -56,9 +56,9 @@ module.exports = class BaseballData {
         if (baseballJson == null) {
             const url = `https://gd2.mlb.com/components/game/mlb/year_${gameDayObj.year}/month_${gameDayObj.month}/day_${gameDayObj.day}/miniscoreboard.json`;
 
-            this.logger.info("Cache Lookup for: " + theTeam + " -  Miss: " + key);
+            this.logger.info(`Getting fresh data for: ${key}`);
             // tslint:disable-next-line:no-console
-            this.logger.info("URL: " + url);
+            // this.logger.info("URL: " + url);
         
             await axios.get(url)
                 .then((response: any) => {
@@ -118,7 +118,7 @@ module.exports = class BaseballData {
                     let game: any = null;
                     for (game of baseballJson.data.games.game) {
                         if (game.away_name_abbrev === theTeam || game.home_name_abbrev === theTeam) {
-                            console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
+                            //console.log("Game Day: " + theTeam + " " + JSON.stringify(game.id, null, 4));
                             game.day = weekdays[gameDate.getDay()];
                             game.date = months[gameDate.getMonth()] + " " + gameDate.getDate();
                         

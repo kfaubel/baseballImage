@@ -63,7 +63,7 @@ module.exports = class BaseballImage {
             requestDate.setDate(requestDate.getDate() + dayIndex);
 
             // tslint:disable-next-line:no-console
-            this.logger.info("[" + teamAbbrev + " (" + teamLookup + ")" + "] Requesting game for date: " + requestDate.toDateString());
+            // this.logger.info("[" + teamAbbrev + " (" + teamLookup + ")" + "] Requesting game for date: " + requestDate.toDateString());
             const day = await this.baseballData.getDate(requestDate, teamLookup);
             this.dayList.push(day);
         }
